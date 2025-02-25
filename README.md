@@ -12,4 +12,4 @@ Una de las intervenciones más eficaces para reducir la mortalidad neonatal es g
 
 Es por ello por lo que nace el proyecto in3ator,cuando, en 2014 un grupo de ingenieros y médicos contemplaron la necesidad de desarrollar una cuna neonatal accesible, de código abierto. En 2019, se crea la ONG "Medicina Abierta al Mundo", que desarrolla y distribuye incubadoras por todo el mundo.
 
-Nos proponen colaborar al desarrollo de un pulsioxímetro externo, para traducir las señales en valores de saturación de oxígeno y pulso. Por lo que, en este repositorio, se pretenden reflejar las correspondientes tareas que se han llevado a cabo para su implementación.
+Nos proponen colaborar en el desarrollo de un pulsioxímetro externo, para traducir las señales en valores de saturación de oxígeno y pulso. Por lo que, en este repositorio, se pretenden reflejar las correspondientes tareas que se han llevado a cabo para su implementación.
