@@ -10,6 +10,10 @@ Si bien el problema de los nacimientos prematuros tiene un alcance global, exist
 
 Una de las intervenciones más eficaces para reducir la mortalidad neonatal es garantizar un entorno cálido y seguro para los recién nacidos, en especial para aquellos que son extremadamente vulnerables. En este contexto, las incubadoras neonatales juegan un papel crucial, ya que proporcionan el cuidado térmico necesario para mejorar las tasas de supervivencia de los bebés prematuros.
 
-Es por ello por lo que nace el proyecto in3ator,cuando, en 2014 un grupo de ingenieros y médicos contemplaron la necesidad de desarrollar una cuna neonatal accesible, de código abierto. En 2019, se crea la ONG "Medicina Abierta al Mundo", que desarrolla y distribuye incubadoras por todo el mundo.
+Es en este contexto donde surge el proyecto In3ator. En 2014, un grupo de ingenieros y médicos, al tomar conciencia de la problemática de la mortalidad neonatal, decidieron desarrollar una cuna neonatal accesible, de bajo coste y código abierto. En 2019, se creó la ONG Medicina Abierta al Mundo, con el objetivo de desarrollar y distribuir incubadoras de bajo coste en todo el mundo, especialmente en países de bajos recursos.
 
-Nos proponen colaborar en el desarrollo de un pulsioxímetro externo, para traducir las señales en valores de saturación de oxígeno y pulso. Por lo que, en este repositorio, se pretenden reflejar las correspondientes tareas que se han llevado a cabo para su implementación.
+Dentro de este marco, el proyecto propone la colaboración en el desarrollo de un pulsioxímetro externo que permita traducir las señales obtenidas de los sensores en valores de saturación de oxígeno y pulso, contribuyendo a una monitorización más precisa y en tiempo real de los neonatos. Este TFG tiene como objetivo desarrollar el software necesario para procesar las señales crudas del pulsioxímetro y obtener datos clínicos útiles, como la saturación de oxígeno (SpO₂) y la frecuencia cardíaca, los cuales son fundamentales para evaluar el estado de los recién nacidos prematuros.
+
+A través de este trabajo, se reflejan las tareas que se han llevado a cabo para la implementación del pulsioxímetro en el contexto de In3ator, abordando tanto los fundamentos teóricos necesarios para comprender la pulsioximetría como las soluciones prácticas aplicadas al software y hardware de la incubadora.
+
+
