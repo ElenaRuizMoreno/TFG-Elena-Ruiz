@@ -14,7 +14,7 @@ Desde el inicio, el reto ha sido claro: convertir señales ópticas crudas en in
 
 ### Introducción 
 
-El desarrollo de este proyecto surge de un primer contacto con la ONG [Medicina Abierta al Mundo]([https://www.ejemplo.com](https://github.com/medicalopenworld) en la que nos introducen la necesidad de integrar una mejora a la incubadora, y esa mejora es la incorporación de un pulsioxímetro integrado que sea capaz de estimar la frecuencia cardíaca y la saturación de oxígeno de un neonato. Para ello, nos hacen llegar todo lo necesario para el desarrollo del proyecto, y comenzamos a trabajar investigando el funcionamiento de un pulsioxímetro convencional e intentar acercar esa teoría a los materiales con los que disponíamos.
+El desarrollo de este proyecto surge de un primer contacto con la ONG [Medicina Abierta al Mundo](https://github.com/medicalopenworld) en la que nos introducen la necesidad de integrar una mejora a la incubadora, y esa mejora es la incorporación de un pulsioxímetro integrado que sea capaz de estimar la frecuencia cardíaca y la saturación de oxígeno de un neonato. Para ello, nos hacen llegar todo lo necesario para el desarrollo del proyecto, y comenzamos a trabajar investigando el funcionamiento de un pulsioxímetro convencional e intentar acercar esa teoría a los materiales con los que disponíamos.
 
 ### Contenido del repositorio
 
