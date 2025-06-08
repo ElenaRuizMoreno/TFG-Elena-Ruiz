@@ -4,11 +4,15 @@ Esta carpeta almacena los archivos generados por el pulsioxímetro, organizados 
 
 ## Estructura
 
-**brutos/:** Contiene los datos sin procesar capturados directamente del pulsioxímetro en formato CSV.
+**Datos crudos/:** Contiene los datos sin procesar capturados directamente del pulsioxímetro en formato CSV.
 
 - save_log/: Archivos generados con el script save_log.py.
 
 - save_log2/: Archivos generados con el script save_log2.py.
+
+**Datos limpios/:** Contiene los datos a los que se les ha quitado la parte de la señal que eran artefactos. Ha sido un recorte específico para cada señal.
+
+**Procesados/:** Contiene los datos a los que se les han recortado los primeros y últimos 5 segundos.
 
 README.md: Este archivo con la descripción de la carpeta.
 
@@ -20,15 +24,15 @@ Cada archivo CSV generado sigue el siguiente formato:
 
 - Columnas principales:
 
-- timestamp: Momento en que se tomó la muestra.
+- Tiempo (ms): Momento en que se tomó la muestra.
 
-- led1: Señal del LED rojo.
+- IR: Señal del LED IR.
 
-- led1_ambiente: Señal ambiente del LED rojo.
+- AMB_IR: Señal ambiente del LED IR.
 
-- led2: Señal del LED infrarrojo.
+- RED: Señal del LED rojo.
 
-- led2_ambiente: Señal ambiente del LED infrarrojo.
+- AMB_RED: Señal ambiente del LED rojo.
 
 
 
