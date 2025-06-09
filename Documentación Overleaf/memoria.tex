@@ -1,0 +1,281 @@
+\documentclass[a4paper,12pt,twoside]{memoir}
+
+% Castellano
+\usepackage[spanish,es-tabla]{babel}
+\selectlanguage{spanish}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Scalable font
+\usepackage{microtype}
+\usepackage{placeins}
+\usepackage{float}
+\usepackage[justification=centering]{caption}
+
+\RequirePackage{booktabs}
+\RequirePackage[table]{xcolor}
+\RequirePackage{xtab}
+\RequirePackage{multirow}
+
+% Links
+\PassOptionsToPackage{hyphens}{url}\usepackage[colorlinks]{hyperref}
+\hypersetup{
+	allcolors = {red}
+}
+
+% Ecuaciones
+\usepackage{amsmath}
+
+% Rutas de fichero / paquete
+\newcommand{\ruta}[1]{{\sffamily #1}}
+
+% Párrafos
+\nonzeroparskip
+
+% Huérfanas y viudas
+\widowpenalty100000
+\clubpenalty100000
+
+\let\tmp\oddsidemargin
+\let\oddsidemargin\evensidemargin
+\let\evensidemargin\tmp
+\reversemarginpar
+
+% Imágenes
+
+% Comando para insertar una imagen en un lugar concreto.
+% Los parámetros son:
+% 1 --> Ruta absoluta/relativa de la figura
+% 2 --> Texto a pie de figura
+% 3 --> Tamaño en tanto por uno relativo al ancho de página
+\usepackage{graphicx}
+
+\newcommand{\imagen}[3]{
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=#3\textwidth]{#1}
+		\caption{#2}\label{fig:#1}
+	\end{figure}
+	\FloatBarrier
+}
+
+
+
+
+
+
+
+\graphicspath{ {./img/} }
+
+% Capítulos
+\chapterstyle{bianchi}
+\newcommand{\capitulo}[2]{
+	\setcounter{chapter}{#1}
+	\setcounter{section}{0}
+	\setcounter{figure}{0}
+	\setcounter{table}{0}
+	\chapter*{#2}
+	\addcontentsline{toc}{chapter}{#2}
+	\markboth{#2}{#2}
+}
+
+% Apéndices
+\renewcommand{\appendixname}{Apéndice}
+\renewcommand*\cftappendixname{\appendixname}
+
+\newcommand{\apendice}[1]{
+	%\renewcommand{\thechapter}{A}
+	\chapter{#1}
+}
+
+\renewcommand*\cftappendixname{\appendixname\ }
+
+% Formato de portada
+
+\makeatletter
+\usepackage{xcolor}
+\newcommand{\tutor}[1]{\def\@tutor{#1}}
+\newcommand{\tutorb}[1]{\def\@tutorb{#1}}
+
+\newcommand{\course}[1]{\def\@course{#1}}
+\definecolor{cpardoBox}{HTML}{E6E6FF}
+\def\maketitle{
+  \null
+  \thispagestyle{empty}
+  % Cabecera ----------------
+\begin{center}
+  \noindent\includegraphics[width=\textwidth]{cabeceraSalud}\vspace{1.5cm}%
+\end{center}
+  
+  % Título proyecto y escudo salud ----------------
+  \begin{center}
+    \begin{minipage}[c][1.5cm][c]{.20\textwidth}
+        \includegraphics[width=\textwidth]{escudoSalud.pdf}
+    \end{minipage}
+  \end{center}
+  
+  \begin{center}
+    \colorbox{cpardoBox}{%
+        \begin{minipage}{.8\textwidth}
+          \vspace{.5cm}\Large
+          \begin{center}
+          \textbf{TFG del Grado en Ingeniería de la Salud}\vspace{.6cm}\\
+          \textbf{\LARGE\@title{}}
+          \end{center}
+          \vspace{.2cm}
+        \end{minipage}
+    }%
+  \end{center}
+  
+    % Datos de alumno, curso y tutores ------------------
+  \begin{center}%
+  {%
+    \noindent\LARGE
+    Presentado por \@author{}\\ 
+    en Universidad de Burgos\\
+    \vspace{0.5cm}
+    \noindent\Large
+    \@date{}\\
+    \vspace{0.5cm}
+    %Tutor: \@tutor{}\\ % comenta el que no corresponda
+    Tutor: \@tutor{} %-- \@tutorb{}\\
+  }%
+  \end{center}%
+  \null
+  \cleardoublepage
+  }
+\makeatother
+
+\newcommand{\nombre}{Elena Ruiz Moreno}
+\newcommand{\nombreTutor}{Telmo Miguel Medina} 
+\newcommand{\nombreTutorb}{Tutor 2} 
+\newcommand{\dni}{71798280P} 
+
+% Datos de portada
+\title{Implementación del software de un pulsioxímetro externo integrado en la incubadora In$^3$ator}
+\author{\nombre}
+\tutor{\nombreTutor}
+\tutorb{\nombreTutorb}
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+
+\newpage\null\thispagestyle{empty}\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\thispagestyle{empty}
+
+
+\noindent\includegraphics[width=\textwidth]{cabeceraSalud}\vspace{1cm}
+
+\noindent D. \nombreTutor, profesor del departamento de Ingeniería Electromecánica, área de Tecnología Electrónica.
+
+\noindent Expone:
+
+\noindent Que el alumno D. \nombre, con DNI \dni, ha realizado el Trabajo final de Grado en Ingeniería de la Salud titulado 'Implementación del software de un pulsioxímetro externo integrado en la incubadora \textit{In$^3$ator}'. 
+
+\noindent Y que dicho trabajo ha sido realizado por el alumno bajo la dirección del que suscribe, en virtud de lo cual se autoriza su presentación y defensa.
+
+\begin{center} %\large
+En Burgos, {\large \today}
+\end{center}
+
+\vfill\vfill\vfill
+
+% Author and supervisor
+%\begin{minipage}{0.45\textwidth}
+%\begin{flushleft} %\large
+%Vº. Bº. del Tutor:\\[2cm]
+%D. \nombreTutor
+%\end{flushleft}
+%\end{minipage}
+%\hfill
+%\begin{minipage}{0.45\textwidth}
+%\begin{flushleft} %\large
+%Vº. Bº. del Tutor:\\[2cm]
+%D. \nombreTutorb
+%\end{flushleft}
+%\end{minipage}
+%\hfill
+
+\vfill
+
+% para casos con solo un tutor comentar lo anterior
+% y descomentar lo siguiente
+Vº. Bº. del Tutor:\\[2cm]
+D. Telmo Miguel Medina
+
+
+\newpage\null\thispagestyle{empty}\newpage
+
+
+
+
+\frontmatter
+
+% Abstract en castellano
+\renewcommand*\abstractname{Resumen}
+\begin{abstract}
+En las últimas décadas, la mortalidad neonatal ha disminuido notablemente, pero aún sigue siendo una realidad persistente en muchas regiones del mundo. La ONG Medicina Abierta al Mundo actúa frente a esta problemática desarrollando incubadoras de bajo coste destinadas a hospitales de países con recursos limitados. Este Trabajo de Fin de Grado se suma a ese esfuerzo colectivo, con el objetivo de desarrollar un sistema de pulsioximetría integrado en la incubadora \textit{In$^3$ator}, capaz de estimar de forma continua y no invasiva la saturación de oxígeno y la frecuencia cardíaca de los neonatos.
+
+Para ello, se ha diseñado e implementado un procedimiento completo de adquisición, procesamiento y análisis de señales fotopletismográficas, utilizando un sensor óptico U401-D conectado a un AFE4490. Su funcionamiento ha sido validado con datos reales. Posteriormente, los algoritmos desarrollados se han integrado directamente en el firmware de la incubadora, permitiendo su ejecución en tiempo real sobre el microcontrolador.
+
+Más allá del desafío técnico, este proyecto nace del deseo de contribuir con algo útil, replicable y alineado con la realidad sanitaria de muchos lugares olvidados. El resultado final representa una primera aproximación funcional hacia la integración de este sistema de monitorización en una incubadora operativa, actualmente utilizada con éxito en entornos clínicos.
+
+
+\end{abstract}
+
+\renewcommand*\abstractname{Descriptores}
+\begin{abstract}
+Frecuencia cardíaca, saturación de oxígeno, pulsioxímetro, señales biomédicas, procesamiento de señales, bajo coste, código abierto, salud neonatal, incubadora, in3ator, países en desarrollo.
+\end{abstract}
+
+\clearpage
+
+% Abstract en inglés
+\renewcommand*\abstractname{Abstract}
+\begin{abstract}
+In recent decades, neonatal mortality has declined significantly, but it remains a persistent reality in many regions of the world. The NGO Medical Open World is addressing this problem by developing low-cost incubators for hospitals in countries with limited resources. This Final Degree Project contributes to this collective effort, with the aim of developing a pulse oximetry system integrated into the \textit{In$^3$ator} incubator, capable of continuously and non-invasively estimating the oxygen saturation and heart rate of newborns.
+
+To this end, a complete procedure for acquiring, processing, and analysing photoplethysmographic signals has been designed and implemented, using a U401-D optical sensor connected to an AFE4490. Its operation has been validated with real data. Subsequently, the algorithms developed have been integrated directly into the incubator's firmware, allowing them to be executed in real time on the microcontroller.
+
+Beyond the technical challenge, this project stems from the desire to contribute something useful, replicable, and aligned with the healthcare reality of many forgotten places. The final result represents a first functional approach towards integrating this monitoring system into an operational incubator, currently used successfully in clinical contexts.
+\end{abstract}
+
+\renewcommand*\abstractname{Keywords}
+\begin{abstract}
+Heart rate, oxygen saturation, pulse oximeter, biomedical signals, signal processing, low cost, open source, neonatal health, incubator, in3ator, developing countries.
+\end{abstract}
+
+\clearpage
+
+% Indices
+\tableofcontents
+
+\clearpage
+
+\listoffigures
+
+\clearpage
+
+\listoftables
+\clearpage
+
+
+\mainmatter
+\include{./tex/1_introduccion}
+\include{./tex/2_objetivos}
+\include{./tex/3_teoricos}
+\include{./tex/4_metodologia}
+\include{./tex/5_resultados}
+\include{./tex/6_conclusiones}
+\include{./tex/7_lineas_futuras}
+
+
+\bibliographystyle{apalike}
+\bibliography{bibliografia}
+
+\end{document}

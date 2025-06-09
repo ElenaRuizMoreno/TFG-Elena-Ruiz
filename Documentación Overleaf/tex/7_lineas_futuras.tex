@@ -1,0 +1,53 @@
+\capitulo{7}{Lineas de trabajo futuras}
+
+A continuación, se proponen las principales líneas de trabajo recomendadas para continuar y mejorar el presente proyecto:
+
+\textbf{1. Estabilización de las estimaciones en tiempo real}
+
+Actualmente, las estimaciones de SpO$_2$ y frecuencia cardíaca presentan variaciones  entre ciclos, especialmente en condiciones de baja perfusión o movimientos mínimos. La principal mejora que podría realizarse sería investigar e implementar algoritmos de post-procesado menos sensibles, que estabilicen las lecturas sin comprometer la capacidad de detectar cambios clínicamente relevantes.
+
+\textbf{2. Visualización en tiempo real y exportación de datos}
+
+Actualmente, el sistema cuenta con una pantalla TFT ya configurada, capaz de mostrar información en tiempo real. Sin embargo, no ha sido posible integrar la visualización de los valores calculados de saturación de oxígeno y frecuencia cardíaca que calcula el pulsioxímetro. Como línea de trabajo adicional, se recomienda:
+
+\begin{itemize}
+\item Implementar la transmisión de estos valores procesados a la pantalla TFT utilizando funciones gráficas compatibles con la biblioteca actual.
+\item Añadir una rutina que actualice los valores en pantalla cada cierto tiempo, controlando bien el formato (por ejemplo, el número de cifras o la posición del texto) para que los datos se vean claros y no se solapen entre sí.
+\item Estudiar posibles conflictos de interrupciones, sincronización o gestión de buffers que puedan estar impidiendo el envío correcto de datos desde el algoritmo de cálculo a la función que imprime los datos por pantalla.
+\end{itemize}
+
+\textbf{3. Optimización frente a artefactos de movimiento y luz}
+
+La sensibilidad del sensor a la luz ambiente y al movimiento del neonato prematuro limita su precisión y funcionalidad, especialmente en entornos clínicos reales. Sería recomendable:
+
+\begin{itemize}
+\item Revisar e implementar correctamente el sistema de cancelación de luz ambiente, asegurando que el software descuenta la señal medida con los LEDs apagados para eliminar interferencias externas (como la luz ambiental de la sala).
+\item El sistema de la incubadora ya dispone de un conector DB9 hembra que se utiliza actualmente para conectar el sensor óptico principal. Aunque este conector no fue desarrollado dentro de este proyecto, abre la posibilidad de incorporar otros sensores en versiones futuras del sistema.
+
+Por ejemplo, se podría estudiar la inclusión de un acelerómetro (como el ADXL362 o el MPU6050) que permita detectar movimiento del neonato y corregir artefactos en las señales PPG. También se podría explorar la posibilidad de usar un sensor de presión para verificar si hay buen contacto del sensor con la piel.
+
+Estas modificaciones requerirían adaptar el firmware, pero permitirían mejorar la precisión y sensibilidad del sistema de pulsioximetría en situaciones reales de uso.
+
+\end{itemize}
+
+\textbf{4. Validación en población objetivo}
+
+Hasta el momento, las pruebas se han realizado exclusivamente en adultos sanos. En el caso de que se alcanzara una precisión y frecuencia lo suficientemente estables, además de poder imprimir los datos por el monitor del sistema, sería recomendable la realización de ensayos clínicos controlados en neonatos reales con diferentes fenotipos (tono de piel, peso, edad gestacional)\footnote{para no comprometer su diagnóstico clínico podrían ser neonatos de varias semanas de edad o incluso meses.}. Esto permitiría:
+
+\begin{itemize}
+\item Evaluar la precisión real del algoritmo.
+\item Determinar la necesidad de ajustar los coeficientes de los algoritmos para mejorar la exactitud en la población pediátrica
+\end{itemize}
+
+
+\textbf{5. Mejora de la eficiencia computacional}
+
+Los algoritmos actuales han sido seleccionados por su sencillez y por haber comprobado ser eficientes previamente, pero siguen consumiendo recursos. Una línea futura de trabajo será optimizar aún más el código, asegurando que el sistema sea viable dado los materiales de los que se disponen.
+
+\textbf{6. Soporte para nuevos sensores o longitudes de onda}
+
+En un futuro, se podría explorar el uso de sensores multicanal (con más de dos longitudes de onda) que permitan detectar la presencia de carboxihemoglobina o metahemoglobina, o mejorar la precisión en tonos de piel oscuros, como ya ocurre en dispositivos avanzados. También podría considerarse la integración con sensores de respiración (frecuencia respiratoria, índice de perfusión), creando un sistema multiparámetro compacto.
+
+\textbf{7. Inclusión en la plataforma centralizada de monitorización de la ONG}
+
+La ONG que impulsa el sistema \textit{In$^3$ator} dispone de una plataforma de monitorización que integra distintos parámetros fisiológicos de los neonatos. Este sistema reconoce los datos a partir de las tarjetas SIM que las incubadoras llevan integradas. Una mejora importante sería permitir que las variables estimadas por este sistema de pulsioximetría se integren también en dicha plataforma, mediante exportación de datos por UART, USB o Wi-Fi si estuviera disponible. Esto permitiría un seguimiento remoto más completo por parte del personal médico.

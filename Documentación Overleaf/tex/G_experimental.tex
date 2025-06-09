@@ -1,0 +1,157 @@
+\apendice{Estudio experimental}
+
+Este anexo recoge de forma detallada el trabajo experimental desarrollado a lo largo del proyecto, incluyendo tanto las fases de diseño, configuración e implementación como los procesos iterativos de prueba, validación y corrección. Se documentan los pasos seguidos para la adquisición y procesamiento de señales del pulsioxímetro integrado en la incubadora \textit{In$^3$ator}, con especial énfasis en los resultados erróneos o no válidos obtenidos durante el desarrollo, y en el análisis técnico realizado hasta alcanzar resultados fiables y representativos.
+
+\section{Cuaderno de trabajo.}
+
+\subsection{Fase de análisis e integración del sistema }
+
+Para comenzar con el proyecto, disponíamos de material ya desarrollado por el equipo \textit{In$^3$ator}, por lo que comenzamos con una fase de análisis del sistema de la incubadora. Se estudió el sensor óptico UA401-D, el AFE4490 como front-end analógico, y los esquemas eléctricos de la PCB. También fue necesario familiarizarse con el entorno de desarrollo PlatformIO y con el código existente, el cual presentaba una estructura poco modular y escasamente documentada. Estas limitaciones iniciales dificultaron la acción directa sobre el código y marcaron el comienzo de una fase de rediseño centrada en la adquisición de datos crudos. 
+
+La importación del proyecto al entorno de desarrollo resultó algo compleja, ya que al tratarse de un sistema completo para el funcionamiento de toda la incubadora (no solo del módulo de pulsioximetría), contenía una gran cantidad de líneas de código, clases, librerías y dependencias, lo que dificultaba su carga y ralentizaba el sistema. 
+Además, el firmware no podía exportarse ni compilarse desde cualquier ruta del sistema de archivos, lo que obligó a reorganizar manualmente los directorios y ajustar varias configuraciones de PlatformIO para poder compilarlo correctamente. 
+
+Igualmente, fue necesario realizar tareas de hardware que no estaban previstas, como la soldadura de algunos pines en la PCB para permitir la conexión con el programador. No disponía del material ni de los conocimientos necesarios para realizar esta tarea por mi cuenta, por lo que fue imprescindible acudir al laboratorio, donde el tutor me ayudó a realizar correctamente la soldadura.  Esta tarea permitió establecer la comunicación entre el microcontrolador y el programador, para que el ordenador pudiera leer los datos que se querían registrar.
+
+Superada esta etapa, surgieron nuevas dificultades relacionadas con el cableado. El cable proporcionado inicialmente era de tipo USB-C, incompatible con el programador utilizado, que requería una conexión microUSB. Una vez conseguido el cable adecuado, persistieron los errores de comunicación: el ordenador no reconocía el dispositivo porque el conector no hacía buen contacto físico con la clavija del programador. Tras varias comprobaciones, se logró estabilizar la conexión aplicando presión manual para ajustar mejor el cable al puerto. Fue entonces cuando, finalmente, se consiguió visualizar por pantalla los datos crudos del sensor en tiempo real, lo que permitió, por primera vez, dar inicio a la fase de adquisición y análisis de señales. 
+
+\subsection{Adquisición de datos y análisis preliminar de señales}
+
+Una vez conseguida la visualización en tiempo real de los datos crudos del sensor a través del puerto serie, el siguiente paso fue intentar adaptar el código del firmware para estructurar los datos en un formato más manejable. El código base ya generaba continuamente las cuatro señales que proporciona el AFE4490 (\texttt{IR}, \texttt{AMB\_IR}, \texttt{RED}, \texttt{AMB\_RED}), pero debido a la complejidad del firmware y a la falta de experiencia previa en su estructura, resultaba difícil intervenir directamente sobre él. Por ello, se optó por avanzar en paralelo capturando los datos en formato \texttt{.csv} y realizar el procesamiento y análisis por separado en un entorno controlado como Python, que es lo que principalmente se ha utilizado en la carrera. 
+
+No obstante, para poder adaptar correctamente el flujo de adquisición, fue necesario modificar la función \texttt{get\_AFE44XX\_Data()} del archivo fuente \texttt{spo2.cpp}, con el fin de tener una referencia temporal en milisegundos e imprimir las señales por el puerto serie de forma estructurada. También se añadió una condición para limitar la duración de cada registro a 30 segundos y se introdujo un control de tiempo basado en \texttt{delayMicroseconds()} para mantener una frecuencia de adquisición cercana a 60~Hz, adecuada para el posterior análisis.
+
+En paralelo, se desarrollaron dos versiones del script en Python para capturar y almacenar los datos del sensor. La primera versión, \texttt{save\_log.py}, permitió comprobar la recepción de datos en el equipo, pero presentaba varias limitaciones que fueron señaladas durante una revisión con el tutor: la frecuencia de muestreo era demasiado baja, solo se registraban dos señales (en lugar de las cuatro disponibles, esto debido a un error en la modificación de la función) y no se incluía una cabecera descriptiva en el archivo.
+
+A raíz de estos comentarios, se desarrolló una segunda versión mejorada, tanto del firmware como del script. En el caso de la función principal \texttt{get\_AFE44XX\_Data()}, se aplicaron los ajustes mencionados para la temporización, la duración de captura y la salida de datos completa por el puerto serie. En cuanto al nuevo script \texttt{save\_log2.py}, se programó para recibir correctamente las cinco variables por el puerto serie (incluido el tiempo en ms), incluir una cabecera con los nombres de las columnas, mostrar los datos en tiempo real por consola, y guardar automáticamente cada sesión en un archivo \texttt{.csv}. Además, se nombró cada archivo en el formato \texttt{raw\_data\_SpO2\_HR.csv}, incluyendo en él los valores de SpO\textsubscript{2} y frecuencia cardíaca obtenidos manualmente al final de cada registro con dispositivos comerciales colocados en la mano contraria.
+
+
+Durante esta fase se realizaron numerosas sesiones de adquisición, todas ellas de 30 segundos. En los primeros registros comenzaron a aparecer algunos problemas técnicos. En ocasiones, las señales presentaban interferencias por ruido o artefactos por movimiento e incluso había registros con los que se obtenían valores constantes, seguramente por la mala colocación del dedo o por la presencia de demasiada luz. Además, en situaciones en las que se intentaba aumentar el ritmo cardíaco (saltando o subiendo escaleras), aparecían crecimientos prolongados en la forma de onda que dificultaban el cálculo de la línea base, provocando errores en los algoritmos de análisis. Estos registros se conservaron inicialmente para su estudio posterior, aunque algunos fueron eliminados por considerarse no utilizables.
+
+A lo largo de esta etapa se generaron aproximadamente entre 30 y 40 registros. La clasificación en señales válidas o no válidas no se realizó en un primer momento, sino que fue introducida más adelante como parte del proceso de validación de los algoritmos. En un primer análisis visual mediante notebooks en Jupyter, se detectaron señales inestables o con valores fuera de rango. Por ello, se hizo una primera eliminación basada en inspección visual, complementada más tarde por la validación de los parámetros calculados, descartando aquellos que presentaban valores fisiológicamente imposibles.
+
+También se decidió, en una fase posterior, recortar el inicio y el final de cada registro para eliminar los efectos transitorios asociados a la colocación del sensor. Inicialmente se planteó eliminar de forma general los primeros y últimos 5 segundos, pero con el tiempo se optó por realizar un recorte personalizado para cada señal, analizando de forma manual qué segmentos eran realmente válidos en cada caso.
+
+\subsection{Procesamiento de señales}
+En el momento en el que se registraron suficientes señales como para realizar un análisis que permitiera comparar resultados, se procedió a la estimación de los dos principales parámetros que queríamos obtener del pulsioxímetro: la frecuencia cardíaca y la saturación de oxígeno en sangre. Inicialmente, se intentó calcular ambos valores al mismo tiempo, pero más tarde decidimos tratar de sacar ambos procedimientos por separado, al ver que iba a ser más complicado de lo esperado. Se comenzó con el cálculo de la frecuencia cardíaca al tratarse de un método menos costoso y más fácil de entender.
+
+Antes de obtener resultados válidos, se probaron varios métodos de procesamiento de señal que no ofrecieron resultados satisfactorios. Estos ensayos fueron necesarios para explorar diferentes enfoques, pero en muchos casos los resultados obtenidos fueron erróneos o imposibles.
+
+Uno de los primeros métodos consistió en aplicar filtros paso bajo simples directamente sobre la señal IR, sin realizar ninguna corrección por luz ambiente. Aunque la señal se suavizaba visualmente, no era suficiente para eliminar el ruido, y los picos resultaban confusos o poco definidos. En algunos casos, el filtrado excesivo eliminaba también la componente pulsátil de interés, provocando señales distorsionadas.
+
+Se descubrió que modificando los parámetros de los filtros empleados, se mejoraba la estimación, sin embargo, estos cambios no servían para todos los registros y, además no seguían ningún patrón que pudiera servir de ayuda para obtener mejores resultados, si no que era puro azar.
+
+En otros intentos se aplicó directamente la detección de picos sin un preprocesamiento adecuado. Esto provocó resultados fuera del rango fisiológico, debido a la sensibilidad del algoritmo a pequeñas variaciones del ruido. En algunos casos no se detectaban picos, y en otros se detectaban muchos falsos positivos, lo que impedía obtener estimaciones fiables.
+
+También se realizaron pruebas comparando directamente las señales IR y RED sin aplicar filtros ni correcciones. Estas señales presentaban un nivel de ruido elevado y estructuras poco claras, lo que dificultaba cualquier análisis cuantitativo.
+
+Por último, se intentó adaptar algoritmos externos desarrollados para otros sensores o condiciones distintas, pero sus escalas, unidades o características de adquisición no eran compatibles con los datos reales obtenidos, por lo que no ofrecieron ningún resultado útil.
+
+Aunque todos estos métodos fallaron, permitieron identificar errores comunes como la ausencia de corrección de luz ambiente, la necesidad de un mejor filtrado, y la importancia de ajustar correctamente los parámetros del algoritmo de detección.  Uno de los mayores errores iniciales fue no recortar los tramos de señal con interferencias (especialmente al inicio y final del registro), por temor a perder información útil. Sin embargo, se comprobó posteriormente que mantener estos segmentos comprometía gravemente la calidad del análisis. 
+
+Tras los primeros intentos fallidos, se definieron y aplicaron una serie de métodos que ofrecieron resultados razonables y estables, tanto para la estimación de la frecuencia cardíaca como de la saturación de oxígeno. Estos métodos se diseñaron teniendo en cuenta las limitaciones observadas previamente y con un enfoque progresivo, basado en pruebas controladas.
+
+Para el cálculo de la frecuencia cardíaca, el enfoque más efectivo consistió en aplicar un filtrado suave a la señal IR corregida por luz ambiente. Los métodos que ofrecieron mejores resultados fueron la media móvil junto con el filtro de mediana y el filtro paso-bajo Butterworth, que permitían reducir el ruido sin deformar la componente pulsátil. A diferencia de los primeros intentos, en este caso se ajustaron los parámetros de la ventana de filtrado y se aplicó sobre señales ya recortadas, eliminando los tramos iniciales y finales donde se acumulaban artefactos (personalizados para cada señal).
+
+Una vez filtrada la señal, se utilizó un algoritmo de detección de picos que incorporaba una distancia mínima entre pulsos. La configuración de estos parámetros permitió eliminar falsos positivos y garantizar que cada pico detectado correspondiera a un latido. En la mayoría de los casos, se utilizó la señal IR, ya que se comprobó que era más estable que la señal RED.
+
+Con los picos correctamente detectados, se calculó la frecuencia cardíaca a partir del intervalo entre ellos. Esta estimación fue contrastada con los valores obtenidos mediante los pulsioximímetros comerciales, comprobando que en registros limpios la diferencia era poca.
+
+Una vez se obtuvieron los mejores algoritmos con los que conseguir resultados válidos y estables en la estimación de la frecuencia cardíaca, el siguiente paso fue el cálculo de la saturación de oxígeno en sangre. Esta parte del análisis resultó más compleja que el estudio del anterior parámetro, ya que pequeños errores en la señal o en el preprocesamiento afectaban significativamente al resultado final.
+
+Los primeros intentos se basaron en aplicar directamente la fórmula clásica del ratio de razones (\textit{Ratio of Ratios}), utilizando las señales IR y RED tal como se obtenían tras la corrección de luz ambiente. En estos casos, se cometieron varios errores de planteamiento: en algunos métodos no se aplicaba un filtrado adecuado, lo que provocaba que el cálculo de los componentes AC y DC fuera inestable; en otros, la ventana de cálculo era demasiado grande o demasiado pequeña, afectando a la precisión del ratio. Como consecuencia, los resultados obtenidos eran en muchos casos irreales, con valores de SpO$_2$ superiores al 100\% o claramente fuera de rango fisiológico (debajo del 95\%). En ciertos registros, la salida era constante (por ejemplo, 100\% en todos los puntos), lo que evidenciaba un fallo en el algoritmo o en la preparación de los datos.
+
+También se probaron métodos basados en fórmulas más complejas derivadas de otros sensores o artículos, pero muchas de ellas no eran aplicables a las características específicas del sensor utilizado en este proyecto. Además, algunos algoritmos requerían calibración con datos clínicos o curvas de referencia que no estaban disponibles, lo que limitaba su uso práctico.
+
+A raíz de estos resultados, se cambió el enfoque y se trabajó con mayor control sobre cada etapa del procesamiento. Se ajustaron los recortes en las señales para evitar zonas con artefactos, y se realizaron pruebas visuales para comprobar la coherencia entre la señal y la estimación obtenida.
+
+De estos ajustes surgieron cuatro métodos que ofrecieron resultados válidos. El primero, implementado en \texttt{spo2\_algo\_v4.ipynb}, emplea una fórmula cuadrática ajustada al ratio R para obtener estimaciones precisas con bajo coste computacional. El segundo, en \texttt{tabla\_LUT.ipynb}, optimiza el método AC/DC generando una tabla LUT calibrada. El tercero, recogido en \texttt{Paper\_CS.ipynb}, aplica compresión de señal y submuestreo manteniendo una estimación aceptable. El cuarto, en \texttt{uch\_spo2\_table.ipynb}, construye una LUT basada en datos reales interpolados, útil como referencia para validar los demás.
+
+En todos los casos se compararon las estimaciones obtenidas con los valores medidos con pulsioxímetros comerciales al finalizar cada sesión. Esto permitió confirmar que, en condiciones de señal adecuada, los métodos desarrollados eran capaces de ofrecer estimaciones coherentes de SpO$_2$.
+
+\subsection{Implementación en el firmware}
+
+Validados los algoritmos más precisos para la estimación de la frecuencia cardíaca y SpO$_2$ a partir de señales PPG, se procedió a su adaptación e implementación en el firmware del dispositivo. Para ello, se sustituyó el método original de estimación de frecuencia cardíaca y SpO$_2$.
+
+Esta fase permitió eliminar la dependencia exclusiva de scripts y lograr una estimación directamente en el microcontrolador. Se añadieron validaciones adicionales para identificar la presencia del dedo, filtrar resultados poco fiables (por ejemplo, SpO$_2$ fuera de 85–100\%) y suprimir lecturas hasta que se dispusiera de datos suficientes. Tras la integración, se confirmó que el sistema era capaz de entregar lecturas coherentes, con una latencia muy baja, valores de frecuencia cardíaca consistentes con un pulsioxímetro comercial y estimaciones de SpO$_2$ que solo se mostraban cuando eran clínicamente posibles. Esto validó el funcionamiento de toda la cadena completa: desde adquisición hasta visualización de resultados interpretables para el usuario final.
+
+A pesar de estos avances, me hubiera gustado implementar un firmware más completo. Sin embargo, a lo largo del proyecto surgieron diversos problemas técnicos que fueron retrasando el momento de centrarme en el desarrollo de los algoritmos en el microcontrolador.
+
+
+\section{Configuración y parametrización de las técnicas.}
+
+Esta sección recoge los parámetros técnicos y de configuración correspondientes a la versión final del sistema de pulsioximetría, tanto en el firmware embebido en el microcontrolador como en los scripts de captura y análisis desarrollados en Python. Se detallan las constantes utilizadas, los ajustes de filtrado aplicados y los métodos empleados para la estimación de frecuencia cardíaca y saturación de oxígeno, así como los criterios de validación implementados.
+
+\subsection{Frecuencia de muestreo y condiciones de adquisición}
+
+\begin{itemize}
+    \item \textbf{Frecuencia de muestreo}: 60~Hz. Controlada mediante espera activa con \texttt{delayMicroseconds(16670)} en el firmware.
+    \item \textbf{Duración del registro}: 30 segundos por sesión, controlado mediante \texttt{millis()}.
+    \item \textbf{Sensores utilizados}: UA401-D + AFE4490, configurado en modo de adquisición de cuatro señales (IR, RED y sus correspondientes señales de luz ambiente).
+    \item \textbf{Buffer de muestras}: Tamaño \texttt{SAMPLE\_SIZE = 256} para cálculo periódico de FC y SpO\textsubscript{2}.
+    \item \textbf{Nombre del archivo}: \texttt{raw\_data\_SpO2\_HR.csv}, almacenado automáticamente tras cada sesión.
+\end{itemize}
+
+\subsection{Filtrado y estimación de frecuencia cardíaca }
+
+El algoritmo de estimación de frecuencia cardíaca implementado en el firmware es una versión adaptada del algoritmo del que se obtuvo el mejor resultado en Python. Se basa en los siguientes elementos:
+
+\begin{itemize}
+    \item \textbf{Preprocesamiento}: uso de una ventana de 5 muestras para aplicar un filtro de mediana sobre la señal RED.
+    \item \textbf{Buffer circular}: longitud 128 muestras. Se almacena continuamente la señal y se evalúa para detectar picos.
+    \item \textbf{Detección de picos}: se identifica un máximo local en una ventana deslizante de 11 muestras.
+    \item \textbf{Condición de validación}: distancia mínima entre picos de 400~ms.
+    \item \textbf{Estimación}: promedio del intervalo RR de los últimos picos válidos detectados. Se calcula la HR como \( HR = \frac{60}{RR} \) y se valida si está en el rango fisiológico (40--220~bpm).
+\end{itemize}
+
+\subsection{Cálculo de SpO\textsubscript{2} (método Ratio of Ratios + LUT)}
+
+La estimación de SpO\textsubscript{2} se realiza tras acumular 256 muestras por canal. El algoritmo sigue las siguientes etapas:
+
+\begin{itemize}
+    \item \textbf{Centrado y suavizado}: la señal IR se centra respecto a su media (componente DC) y se invierte para detectar los valles (que indican pulsos).
+    \item \textbf{Filtrado}: se aplica una media móvil de orden 4 a la señal invertida.
+    \item \textbf{Detección de valles}: se identifican al menos dos valles consecutivos en la señal IR para delimitar ciclos cardíacos.
+    \item \textbf{Cálculo de AC y DC}: se evalúan las componentes AC y DC de IR y RED en cada ciclo (máximo y mínimo).
+    \item \textbf{Ratio}: se calcula el ratio \( R = \frac{AC_{RED}/DC_{RED}}{AC_{IR}/DC_{IR}} \).
+    \item \textbf{Tabla de búsqueda (LUT)}: se mapea el valor de \( R \) al valor de SpO\textsubscript{2} mediante una tabla predefinida de 184 valores.
+    \item \textbf{Validación}: si el ratio está fuera de rango o las componentes son insuficientes, el valor se descarta como inválido.
+\end{itemize}
+
+\subsection{Criterios de validación y presentación de resultados}
+
+Para garantizar que las lecturas entregadas por el sistema fueran realistas y clínicamente útiles, se implementaron varias condiciones de validación:
+
+\begin{itemize}
+    \item \textbf{Presencia del dedo}: si la señal IR es menor a un umbral (10000 unidades), se considera que no hay contacto adecuado.
+    \item \textbf{HR válida}: solo se muestra si está entre 30 y 220~bpm y la variable \texttt{ch\_hr\_valid} indica cálculo correcto.
+    \item \textbf{SpO\textsubscript{2} válida}: se acepta únicamente si está entre 50\% y 100\% y \texttt{ch\_spo2\_valid} es verdadero.
+    \item \textbf{Visualización por Serial}: el firmware muestra por puerto serie solo lecturas que superan los filtros anteriores.
+\end{itemize}
+
+
+
+
+\section{Detalle de resultados.}
+
+El resultado final es una estimación fiable de los parámetros fisiológicos de pulsioximetría con una frecuencia y precisión aceptables y con un proceso previo de adquisición de señales e investigación de los mejores métodos o procedimientos a implementar.
+
+La evaluación del sistema se ha realizado comparando los valores estimados con las lecturas obtenidas mediante pulsioxímetros comerciales colocados en paralelo durante la adquisición de datos. Esta comparación se ha llevado a cabo tanto de forma visual (gráficas en Jupyter Notebook) como numérica (valores finales registrados en los nombres de los archivos).
+
+\subsection{Fiabilidad de la estimación de frecuencia cardíaca}
+
+En las sesiones con señal válida y buena perfusión, la estimación de frecuencia cardíaca muestra una concordancia fiable con los dispositivos de referencia. El error medio en estas condiciones es generalmente inferior a \textbf{±3 bpm}, con una estabilidad adecuada incluso durante pequeños movimientos. 
+
+Sin embargo, en registros con artefactos de movimiento, de luz, picos de ruido o mala colocación del dedo, el algoritmo puede fallar en la detección de picos, devolviendo valores erróneos.
+
+\subsection{Fiabilidad de la estimación de SpO\textsubscript{2}}
+
+El cálculo de SpO\textsubscript{2} resulta más sensible a las condiciones de señal. Se pueden apreciar una mayor frecuencia de valores nulos (--) o valores claramente fuera del rango fisiológico por la imprecisión del cálculo del algoritmo implementado.
+
+\subsection{Limitaciones observadas}
+
+\begin{itemize}
+    \item Alta sensibilidad del cálculo de SpO\textsubscript{2} a pequeñas distorsiones o ruido en las señales.
+    \item Dependencia de una buena colocación del dedo y mínima interferencia por movimiento.
+\end{itemize}
+
