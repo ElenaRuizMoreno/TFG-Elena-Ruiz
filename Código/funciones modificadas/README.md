@@ -1,0 +1,3 @@
+Intercambiar la función "get_AFE44XX_Data_modificada" (cambiar el nombre para que sea igual que la original) donde corresponda dentro del firmware original. Ejecutar el código y después ejecutar "save_log2.py" en el promt de anaconda para obtener los archivos csv.
+
+Intercambiar el archivo "SPO2_modificado.cpp" (cambiar el nombre para que sea igual que la original) por el original para poder obtener los resultados que este trabajo presenta.
