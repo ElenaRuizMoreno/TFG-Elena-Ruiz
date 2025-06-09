@@ -1,1 +1,1 @@
-En este directorio de resultados se muestran solo los parámetros fisiológicos estimados a partir de los algortimos implementados en Python. El resultado final del proyecto se puede obserbar en el vídeo de Demostración del directorio Demostración/
+En este directorio de resultados se muestran solo los parámetros fisiológicos estimados a partir de los algortimos implementados en Python. El resultado final del proyecto se puede observar en el vídeo de Demostración del directorio Demostración/
